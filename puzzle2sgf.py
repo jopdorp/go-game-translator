@@ -2,13 +2,22 @@
 import requests
 import os
 import time
+import argparse
 
-downloadWholeCollection =  False
+downloadWholeCollection =  True
 # if False, only the specified puzzle is downloaded
 # if True, all problems of the specified puzzle's collection are downloaded
+parser = argparse.ArgumentParser(description='Download a Go puzzle from online-go.com')
+parser.add_argument('puzzle_number', type=int, nargs='?', default=10602,
+                    help='the puzzle id taken from the puzzle URL (default: 10602)')
+parser.add_argument('--downloadWholeCollection', action='store_true',
+                    help='download the whole collection of puzzles instead of just the specified puzzle')
 
-puzzleNumber = 6544
+args = parser.parse_args()
 # the puzzle id taken from the puzzle URL
+puzzleNumber = args.puzzle_number
+# Use the downloadWholeCollection flag from the command line argument
+downloadWholeCollection = args.downloadWholeCollection
 
 skipAuthentication = True
 # authentication is required for private problems
@@ -104,7 +113,8 @@ def writePuzzle(file, puzzle):
     if initial_white:
         file.write('AW')
         writeInitialStones(file, initial_white)
-    prependText(puzzle['move_tree'], puzzle['puzzle_description'])
+    if 'puzzle_description' in puzzle:
+        prependText(puzzle['move_tree'], puzzle['puzzle_description'])
     player = puzzle['initial_player'][0].upper()
     file.write('PL[')
     file.write(player)
@@ -129,15 +139,27 @@ responseJSON = requests.get(puzzleUrl, cookies=cookies).json()
 if downloadWholeCollection:
     collectionName = responseJSON['collection']['name']
     collectionFolder = os.getcwd() + '/' + collectionName
-    os.mkdir(collectionFolder)
+    if not os.path.exists(collectionFolder):
+        os.mkdir(collectionFolder)
     os.chdir(collectionFolder)
-with open(responseJSON['name'] + '.sgf', 'w', encoding="utf-8") as file:
-    writePuzzle(file, responseJSON['puzzle'])
+# Replace any slashes in the puzzle name with underscores
+puzzleName = responseJSON['name'].replace('/', '_')
+sgfFile = puzzleName + '.sgf'
+if os.path.exists(sgfFile):
+    print(f'Skipping puzzle {puzzleNumber} because {sgfFile} already exists')
+else:
+    with open(sgfFile, 'w', encoding="utf-8") as file:
+        writePuzzle(file, responseJSON['puzzle'])
 if downloadWholeCollection:
     for puzzle in collection:
         if puzzle['id'] != puzzleNumber:
-            time.sleep(5.0)
-            puzzleUrl = 'https://online-go.com/api/v1/puzzles/' + str(puzzle['id'])
-            puzzleJSON = requests.get(puzzleUrl, cookies=cookies).json()['puzzle']
-            with open(puzzle['name'] + '.sgf', 'w', encoding="utf-8") as file:
-                writePuzzle(file, puzzleJSON)
+            puzzleName = puzzle['name'].replace('/', '_')
+            sgfFile = puzzleName + '.sgf'
+            if os.path.exists(sgfFile):
+                print(f'Skipping puzzle {puzzle["id"]} because {sgfFile} already exists')
+            else:
+                time.sleep(1)
+                puzzleUrl = 'https://online-go.com/api/v1/puzzles/' + str(puzzle['id'])
+                puzzleJSON = requests.get(puzzleUrl, cookies=cookies).json()['puzzle']
+                with open(sgfFile, 'w', encoding="utf-8") as file:
+                    writePuzzle(file, puzzleJSON)
