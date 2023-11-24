@@ -4,8 +4,30 @@ import re
 import os
 import re
 import sys
-import openai
+import torch
+import transformers
 
+# if torch.cuda.is_available():
+#     torch.set_default_device("cuda")
+# else:
+torch.set_default_device("cpu")
+
+model_name_or_path = "TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ"
+# model_name_or_path = "mayaeary/pygmalion-6b-4bit-128g"
+
+model = transformers.AutoModelForCausalLM.from_pretrained("TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ")
+
+# Apply dynamic quantization
+quantized_model = torch.quantization.quantize_dynamic(
+    model, {torch.nn.Linear}, dtype=torch.qint8
+)
+
+model = transformers.AutoModelForCausalLM.from_pretrained(model_name_or_path,
+                                            #  device_map="auto",
+                                             trust_remote_code=True,
+                                             revision="main")
+
+tokenizer = transformers.AutoTokenizer.from_pretrained(model_name_or_path, use_fast=True)
 
 def get_max_digits(directory):
     # Get the maximum number of digits in the file names for each directory
@@ -56,59 +78,95 @@ def translate_comments(file_path):
 
 def translate_to_english(comment):
     # Set up the OpenAI API credentials
-    openai.api_key = "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"
+    
 
     # Define the Go words and their translations
     go_words_translations = {
-        "Go": ["围棋", "Го", "碁"],
-        "Ko": ["劫", "Ко", "コウ"],
-        "Joseki": ["定石", "Дзосеки", "定石"],
-        "Tsumego": ["死活", "Цумего", "詰碁"],
-        "Fuseki": ["布局", "Фусеки", "布石"],
-        "Sente": ["先手", "Сенте", "先手"],
-        "Gote": ["后手", "Готэ", "後手"],
-        "Hane": ["挽", "Ханэ", "ハネ"],
+        "Aji": ["味", "Аджи", "味"],
+        "Aji Keshi": ["收味", "Аджи Кэси", "味消し"],
         "Atari": ["自摆", "Атари", "アタリ"],
-        "Kikashi": ["器差し", "Кикаси", "キカシ"],
+        "Capturing race": ["争杀", "Гонкакусэн", "取り合い"],
+        "Chain": ["串", "Группа", "連"],
+        "Connection": ["连接", "Сурунэ", "繋げ"],
+        "Cut": ["断", "Кири", "切り"],
         "Dame": ["无气", "Дамэ", "ダメ"],
-        "Yose": ["余势", "Ёсэ", "ヨセ"],
-        "Sabaki": ["活き", "Сабаки", "サバキ"],
+        "Damezumari": ["死活变化", "Дамэдзумари", "ダメヅマリ"],
+        "Death": ["死", "Си", "死"],
+        "Dragon": ["龙", "Дракон", "ドラゴン"],
+        "Endgame": ["收官", "Эндго", "エンドゲーム"],
+        "Eye": ["眼", "Глаз", "目"],
+        "False Eye": ["假眼", "Ложное глаз", "偽の目"],
+        "Fuseki": ["布局", "Фусеки", "布石"],
+        "Geta": ["双三", "Гэта", "ゲタ"],
+        "Go": ["围棋", "Го", "碁"],
+        "Gote": ["后手", "Готэ", "後手"],
+        "Group": ["群", "Группа", "グループ"],
+        "Hane": ["挽", "Ханэ", "ハネ"],
+        "Handicap": ["让子", "Гандикап", "ハンデ"],
+        "Hoshi": ["星", "Хоси", "星"],
+        "Ikken Tobi": ["一间跳", "Иккэн Тоби", "一間飛び"],
+        "Influence": ["势力", "Инфлюенс", "インフルエンス"],
+        "Invasion": ["入侵", "Инвейжн", "インベージョン"],
+        "Joseki": ["定石", "Дзосеки", "定石"],
+        "Kakari": ["角落", "Какари", "カカリ"],
+        "Killing": ["杀", "Киллинг", "キリング"],
+        "Kifu": ["棋谱", "Кифу", "棋譜"],
+        "Kikashi": ["器差し", "Кикаси", "キカシ"],
+        "Ko": ["劫", "Ко", "コウ"],
+        "Ko Threat": ["劫威胁", "Ко Тхреат", "コウの脅威"],
+        "Komi": ["贴目", "Коми", "コミ"],
+        "Liberty": ["气", "Либерти", "呼吸点"],
+        "Life": ["活", "Лайф", "ライフ"],
+        "Ladder": ["阶梯", "Леддер", "ラダー"],
         "Meai": ["目合い", "Мэай", "目合い"],
         "Moyo": ["模样", "Мойо", "モヨ"],
-        "Tsuke": ["付け", "Цуке", "ツケ"],
-        "Kifu": ["棋谱", "Кифу", "棋譜"],
-        "Aji": ["味", "Аджи", "味"],
-        "Hoshi": ["星", "Хоси", "星"],
-        "Tengen": ["天元", "Тэнгэн", "天元"],
-        "Shimari": ["定石角", "Шимари", "シマリ"],
-        "Ikken Tobi": ["一间跳", "Иккэн Тоби", "一間飛び"],
-        "Sansan": ["三三", "Сансан", "三々"],
         "Niken Tobi": ["二间跳", "Никэн Тоби", "二間飛び"],
+        "Omoyo": ["大模样", "Омойо", "オモヨ"],
+        "Peep": ["窥视", "Пип", "ピープ"],
+        "Point": ["点", "Пойнт", "ポイント"],
+        "Ponnuki": ["单鬼", "Поннуки", "ポンヌキ"],
+        "Sabaki": ["活き", "Сабаки", "サバキ"],
+        "Seki": ["均势", "Сэки", "セキ"],
+        "Semeai": ["死活争い", "Семэай", "セメアイ"],
+        "Semedori": ["死活捕捉", "Семэдори", "セメドリ"],
+        "Sente": ["先手", "Сенте", "先手"],
+        "Shape": ["形", "Шейп", "シェイプ"],
+        "Shicho": ["阶梯", "Шичо", "シチョ"],
+        "Shimari": ["定石角", "Шимари", "シマリ"],
+        "Soko": ["空", "Соко", "ソコ"],
+        "Tengen": ["天元", "Тэнгэн", "天元"],
+        "Tenuki": ["手抜き", "Тэнуки", "手抜き"],
+        "Territory": ["地", "Территория", "テリトリー"],
+        "Tesuji": ["手筋", "Тэсудзи", "テスジ"],
+        "Tsuke": ["付け", "Цуке", "ツケ"],
+        "Tsumego": ["死活题", "Цумего", "詰碁"],
+        "Vital Point": ["要点", "Витал Пойнт", "ビタルポイント"],
+        "Yose": ["余势", "Ёсэ", "ヨセ"],
         "Yosumi": ["侧对", "Ёсуми", "ヨスミ"],
-        "Korigatachi": ["入り角", "Коригатачи", "コリガタチ"],
-        # Add more Go words and their translations here
+        "Zokusuji": ["杂筋", "Зокусудзи", "ゾクスジ"],
+        "Zuke": ["付け", "Цуке", "ツケ"],
     }
+
 
 
     # Generate the Go words and translations string
     go_words_translations_str = "\n".join([f"{word}: {', '.join(translations)}" for word, translations in go_words_translations.items()])
 
     # Define the translation prompt
-    prompt = f"This is a comment in an SGF file about a game of Go. The comment is: {comment}. Here are some Go words and their translations:\n{go_words_translations_str}"
 
-    # Generate the translation using the OpenAI API
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant for the game of Go."},
-            {"role": "user", "content": prompt}
-        ]
-    )
+    # system_message = "You are Orca, an AI language model created by Microsoft. You are a cautious assistant. You carefully follow instructions. You are helpful and harmless and you follow ethical guidelines and promote positive behavior."
+    # user_message = f"You are a translator, with a specialization in translating text about the game of go into English. You respond with nothing more than the translation.\nHere are some go word translations:\n{go_words_translations_str}\nTranslate the following comment from an SGF file:\n{comment}"
+    # prompt = f"<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{user_message}<|im_end|>\n<|im_start|>assistant"
 
-    # Extract the translated comment from the response
-    translated_comment = response['choices'][0]['message']['content']
+    prompt = f"### Human:\nYou are a translator, with a specialization in translating text about the game of go into English. You respond with nothing more than the translation.\nHere are some go word translations:\n{go_words_translations_str}\nTranslate the following comment from an SGF file:\n{comment}\n\n### ASSISANT:\n"
 
-    return translated_comment
+    inputs = tokenizer(prompt, return_tensors='pt')
+    output_ids = model.generate(inputs["input_ids"],)
+    answer = tokenizer.batch_decode(output_ids)[0]
+
+    print(answer)
+
+    return answer
 
 def main():
     if len(sys.argv) < 2:
