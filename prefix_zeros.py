@@ -4,30 +4,6 @@ import re
 import os
 import re
 import sys
-import torch
-import transformers
-
-# if torch.cuda.is_available():
-#     torch.set_default_device("cuda")
-# else:
-torch.set_default_device("cpu")
-
-model_name_or_path = "TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ"
-# model_name_or_path = "mayaeary/pygmalion-6b-4bit-128g"
-
-model = transformers.AutoModelForCausalLM.from_pretrained("TheBloke/Wizard-Vicuna-7B-Uncensored-GPTQ")
-
-# Apply dynamic quantization
-quantized_model = torch.quantization.quantize_dynamic(
-    model, {torch.nn.Linear}, dtype=torch.qint8
-)
-
-model = transformers.AutoModelForCausalLM.from_pretrained(model_name_or_path,
-                                            #  device_map="auto",
-                                             trust_remote_code=True,
-                                             revision="main")
-
-tokenizer = transformers.AutoTokenizer.from_pretrained(model_name_or_path, use_fast=True)
 
 def get_max_digits(directory):
     # Get the maximum number of digits in the file names for each directory
@@ -42,7 +18,7 @@ def get_max_digits(directory):
                 max_digits[root] = max(max_digits.get(root, 0), num_digits)
     return max_digits
 
-def prefix_zeros(directory):
+def prefix_zeros(directory, should_translate=False):
     # Get the maximum number of digits for each directory
     max_digits = get_max_digits(directory)
 
@@ -57,7 +33,8 @@ def prefix_zeros(directory):
                 new_file_name = re.sub(r"\d+", lambda match: match.group().zfill(max_digits[root]), file, count=1)
                 # Rename the file
                 os.rename(os.path.join(root, file), os.path.join(root, new_file_name))
-                translate_comments(os.path.join(root, new_file_name))  
+                if should_translate:
+                    translate_comments(os.path.join(root, new_file_name))  
 
 # Find comments in the SGF file
 def translate_comments(file_path):
