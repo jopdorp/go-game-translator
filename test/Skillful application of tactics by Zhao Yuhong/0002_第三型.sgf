@@ -1,10 +1,10 @@
-(;AB[dp][cm][hp][kp][lq][mq][oq][qq]AW[qo][ql][lp][kq][iq]C[¡¾µÚÈýÐÍ¡¿ °×ÏÈ
-    °×ÔÚÏÂ±ßÈçºÎÌÚÅ²£¿
-    µ±È»°×»¹²»ÖÂÓÚ³öÏÖ°²È«ÎÊÌâ£¬µ«ÈçÄÜ²ÉÓÃºÃÌÚÅ²ÊÖ·¨¾Í²»»áËðÉË´ó¾Ö¡£]
-AP[MultiGo:4.2.1]SZ[19]MULTIGOGM[1]
+(;AB[dp][cm][hp][kp][lq][mq][oq][qq]AW[qo][ql][lp][kq][iq]C[ã€ç¬¬ä¸‰åž‹ã€‘ ç™½å…ˆ
+    ç™½åœ¨ä¸‹è¾¹å¦‚ä½•è…¾æŒªï¼Ÿ
+    å½“ç„¶ç™½è¿˜ä¸è‡´äºŽå‡ºçŽ°å®‰å…¨é—®é¢˜ï¼Œä½†å¦‚èƒ½é‡‡ç”¨å¥½è…¾æŒªæ‰‹æ³•å°±ä¸ä¼šæŸä¼¤å¤§å±€ã€‚]
+AP[MultiGo:4.2.1]SZ[19]VW[bk:rs]MULTIGOGM[1]
 
-(;W[ko];B[jp];W[ip];B[jo];W[io];B[jn];W[fp]C[Õý×Å
-    °×1´ò³ÔÊÇÌÚÅ²ÊÖ½î£¬Çë¶à¼ÓÌå»á¡£
-    °×3£¬5ÏÈÊÖÀûÓÃºóÕ¼¾Ý7Î»£¬ÒÑ»ù±¾°²¶¨¡£°×1£¬3µÄÊÖ½îºÜÖØÒª¡£°×1ÈçÖ±½Ó×ß3Î»£¬ºÚ1³¤¡£])
-(;W[jp];B[ko];W[jo];B[kr];W[jq];B[kn]LB[jn:A][km:B]C[Ë×ÊÖ
-    °×1´ò£¬3ÌÓ²»ºÃ£¬ÊÇË×ÊÖ¡£±»ºÚ4´òºó6³¤£¬ÒÔºóÈçºÎÖÎ¹ÂÔò³ÉÎÊÌâ¡£Èç°×A£¬ÔòºÚB£¬°×³ÉÎªµäÐÍµÄÁ¬Ñ¹Ë×ÊÖ¡£]))
+(;W[ko];B[jp];W[ip];B[jo];W[io];B[jn];W[fp]C[æ­£ç€
+    ç™½1æ‰“åƒæ˜¯è…¾æŒªæ‰‹ç­‹ï¼Œè¯·å¤šåŠ ä½“ä¼šã€‚
+    ç™½3ï¼Œ5å…ˆæ‰‹åˆ©ç”¨åŽå æ®7ä½ï¼Œå·²åŸºæœ¬å®‰å®šã€‚ç™½1ï¼Œ3çš„æ‰‹ç­‹å¾ˆé‡è¦ã€‚ç™½1å¦‚ç›´æŽ¥èµ°3ä½ï¼Œé»‘1é•¿ã€‚])
+(;W[jp];B[ko];W[jo];B[kr];W[jq];B[kn]LB[jn:A][km:B]C[ä¿—æ‰‹
+    ç™½1æ‰“ï¼Œ3é€ƒä¸å¥½ï¼Œæ˜¯ä¿—æ‰‹ã€‚è¢«é»‘4æ‰“åŽ6é•¿ï¼Œä»¥åŽå¦‚ä½•æ²»å­¤åˆ™æˆé—®é¢˜ã€‚å¦‚ç™½Aï¼Œåˆ™é»‘Bï¼Œç™½æˆä¸ºå…¸åž‹çš„è¿žåŽ‹ä¿—æ‰‹ã€‚]))

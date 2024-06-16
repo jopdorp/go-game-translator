@@ -5,7 +5,6 @@ input=$1
 
 root_dir=$(pwd)
 
-
 convert_sgf_to_png() {
     cd "$@"
     # create $@.csv
@@ -25,12 +24,13 @@ convert_sgf_to_png() {
             echo "recurse $file"
             convert_sgf_to_png "$file"
         elif [[ "$file" == *.sgf ]]; then
-
+            python $root_dir/convert_to_utf8.py "$file"
+            python $root_dir/add_vw_property.py "$file"
             name=$(basename "$file"  .sgf)
             ${root_dir}/sgftopng  "anki_collection/$name.png" 1-0 < "$name.sgf"
             ${root_dir}/sgftopng "anki_collection/$name.solution.png" < "$name.sgf"
-
-            # write new line in "$@".csv first column "anki_collection/${name}.png", second column "anki_collection/${name}.solution.png"
+            convert "anki_collection/$name.png" -colorspace gray -blur 1x0.1 -fuzz 0.5% -fill 'rgb(255,255,255)' -opaque 'rgb(185,185,185)' "anki_collection/$name.png"
+            convert "anki_collection/$name.solution.png" -colorspace gray -blur 1x0.1 -fuzz 0.5% -fill 'rgb(255,255,255)' -opaque 'rgb(185,185,185)' "anki_collection/$name.solution.png"
             echo "<img src='${name}.png'>, <img src='${name}.solution.png'>" >> anki_collection/"$@".csv
         else
             echo "unknown file type $file"
