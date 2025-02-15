@@ -1,7 +1,7 @@
 import re
 import sys
 
-MARGIN = 1
+MARGIN = 2
 BOARD_SIZE = 19
 
 def get_sgf_bounds(sgf_content):
